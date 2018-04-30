@@ -1,0 +1,10 @@
+{
+  "name": "down",
+  "version": "1.0.0",
+  "description": "Game about feelings",
+  "scripts": {
+    "start": "gradlew desktop:run",
+    "jar": "gradlew desktop:dist"
+  },
+  "author": "Paulo Vale"
+}
