@@ -302,7 +302,8 @@ public class Test extends Stage
         if(player.state == Player.DEAD)
         {
             player.revive();
-            init();
+            if(player.state != Player.DEAD)
+                init();
         }
 
         if(!player.isDead())

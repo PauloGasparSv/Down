@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.pvale.tools.Camera;
 import com.pvale.tools.In;
 import com.pvale.tools.Media;
+import com.pvale.tools.Smoke;
 import com.pvale.tools.Wall;
 
 import java.util.List;
@@ -33,6 +34,8 @@ public class Player extends Actor
     private Animation<TextureRegion> falling;
     private Animation<TextureRegion> landing;
     private Animation<TextureRegion> dying;
+
+    private Smoke smoke;
 
     public float gravity;
     public float jumpSpeed;
@@ -61,6 +64,7 @@ public class Player extends Actor
         falling = new Animation<TextureRegion>(0f, Media.getSheetFrames(texture, 168, 24, 1, 1, 24, 24));
         landing = new Animation<TextureRegion>(0.3f, Media.getSheetFrames(texture, 192, 24, 1, 1, 24, 24));
         dying = new Animation<TextureRegion>(0.08f, Media.getSheetFrames(texture, 624, 24, 1, 9, 24, 24));
+        smoke = new Smoke(new Animation<TextureRegion>(0.1f, Media.getSheetFrames(Media.loadTexture("smoke.png"), 1, 4, 16, 16)));
 
         setState(IDDLING, true);
         direction = RIGHT;
@@ -104,12 +108,14 @@ public class Player extends Actor
             setState(DEAD);
         }
       
+        smoke.update(delta);
 
     }
 
     public void revive()
     {
         if(state != DEAD) return;
+        if(System.currentTimeMillis() - deadTimer < 1000) return;
         setState(IDDLING);
         x = startX;
         y = startY;
@@ -248,6 +254,7 @@ public class Player extends Actor
                 currentAnimation = preparing;
                 break;
             case JUMPING:
+                smoke.puff(x + (direction == RIGHT ? 0 : 10) , y - 2);
                 currentAnimation = jumping;
                 break;
             case FALLING:
@@ -255,6 +262,7 @@ public class Player extends Actor
                 break;
             case LANDING:
                 currentAnimation = landing;
+                smoke.puff(x + (direction == RIGHT ? 0 : 10), y - 2);
                 break;
             case DYING:
                 currentAnimation = dying;
@@ -300,7 +308,7 @@ public class Player extends Actor
             if( (state == FALLING || state == JUMPING) )
                 setState(gravity > 40f ? LANDING : IDDLING);
             else
-                setState(LANDING );
+                setState(LANDING);
         }
        
         gravity = 0f;
@@ -351,5 +359,6 @@ public class Player extends Actor
             frame.flip(true, false);
         }
         batch.draw(frame, x, y, 0, 0, 18, 18, 1, 1, rotation);
+        smoke.draw();
     }
 }

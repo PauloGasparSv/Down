@@ -52,7 +52,7 @@ public class Stage extends OrthogonalTiledMapRenderer implements Screen
 
 		if(lavaAnimation == null)
 		{
-			lavaAnimation = new Animation<TextureRegion>(0.5f, Media.getSheetFrames(Media.loadTexture("stage/animated/lava.png"), 1, 3, 32, 32));
+			lavaAnimation = new Animation<TextureRegion>(0.4f, Media.getSheetFrames(Media.loadTexture("stage/animated/lava.png"), 1, 3, 32, 32));
 		}
 
 		Camera.setBorders(0, (Integer)map.getProperties().get("height") * 16,

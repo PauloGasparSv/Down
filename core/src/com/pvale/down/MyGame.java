@@ -32,8 +32,8 @@ public class MyGame extends Game
 		Stage.batch = new SpriteBatch();
 		Stage.game = this;
 
-		setScreen(new Intro());
-		// setScreen(new Test(new Player(null)));
+		// setScreen(new Intro());
+		setScreen(new Test(new Player(null)));
 	}
 
 	@Override
