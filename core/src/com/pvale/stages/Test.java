@@ -167,6 +167,7 @@ public class Test extends Stage
         {
             if(System.currentTimeMillis() - stateTimer > 1200 && System.currentTimeMillis() - stateTimer < 2200)
             {
+                player.exclamate();
                 Camera.shake(35);
                 player.hasNoControls();
             }
@@ -240,6 +241,7 @@ public class Test extends Stage
             }
             else
             {
+                player.exclamate();
                 Camera.shake(8);
                 grokY = 32f;
                 stateTimer = System.currentTimeMillis();

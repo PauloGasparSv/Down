@@ -84,6 +84,7 @@ public class Player extends Actor
     @Override
     public void update(float delta)
     {
+        super.update(delta);
         animationDelta += delta;
         if(hasControls) controls(delta);
         mapCollision(delta);
@@ -353,6 +354,7 @@ public class Player extends Actor
     @Override 
     public void draw(SpriteBatch batch)
     {
+        super.draw(batch);
         TextureRegion frame = currentAnimation.getKeyFrame(animationDelta, state != JUMPING && state != FALLING && state != DYING && state != DEAD);
         if(frame.isFlipX() != !direction)
         {
