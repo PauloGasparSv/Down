@@ -7,7 +7,9 @@ import javax.lang.model.util.ElementScanner6;
 
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapLayers;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
@@ -19,7 +21,11 @@ import com.badlogic.gdx.utils.Array;
 import com.pvale.down.MyGame;
 import com.pvale.tools.Camera;
 import com.pvale.tools.Font;
+import com.pvale.tools.In;
+import com.pvale.tools.Lava;
 import com.pvale.tools.MapPoint;
+import com.pvale.tools.Media;
+import com.pvale.tools.Wall;
 import com.pvale.tools.Sign;
 
 public class Stage extends OrthogonalTiledMapRenderer implements Screen 
@@ -27,8 +33,11 @@ public class Stage extends OrthogonalTiledMapRenderer implements Screen
 	public static SpriteBatch batch;
 	public static OrthographicCamera camera;
 	public static MyGame game;
+
+	public static Animation<TextureRegion> lavaAnimation;
 	
-	protected List<Rectangle> tiles;
+	protected List<Lava> lava;
+	protected List<Wall> tiles;
 	protected List<Rectangle> deathBlocks;
 	protected List<Sign> signs;
 	protected List<MapPoint> points; 
@@ -41,47 +50,60 @@ public class Stage extends OrthogonalTiledMapRenderer implements Screen
 	{
 		super(new TmxMapLoader().load(path));
 
+		if(lavaAnimation == null)
+		{
+			lavaAnimation = new Animation<TextureRegion>(0.5f, Media.getSheetFrames(Media.loadTexture("stage/animated/lava.png"), 1, 3, 32, 32));
+		}
+
 		Camera.setBorders(0, (Integer)map.getProperties().get("height") * 16,
 			(Integer)map.getProperties().get("width") * 16, 0);
 
 		layers = map.getLayers();
-		tiles = new LinkedList<Rectangle>();	
+		tiles = new LinkedList<Wall>();	
 		points = new LinkedList<MapPoint>();	
 		deathBlocks = new LinkedList<Rectangle>();
 		signs = new LinkedList<Sign>();	
+		lava = new LinkedList<Lava>();	
 
 		Array<RectangleMapObject> tileRects =  map.getLayers().get(tilesLayer).getObjects().getByType(RectangleMapObject.class);
 		
 		for(RectangleMapObject rect : tileRects)
 		{	
+			Rectangle temp = rect.getRectangle();
 			if(rect.getProperties().get("type").equals("position"))
 			{
-				Rectangle temp = rect.getRectangle();
 				points.add(new MapPoint(temp.x, temp.y, rect.getName()));	
 				continue;
 			}
 			else if(rect.getProperties().get("type").equals("wall"))
 			{
-				tiles.add(rect.getRectangle());
+				tiles.add(new Wall(temp, rect.getName()));
 			}
 			else if(rect.getProperties().get("type").equals("death"))
 			{
-				deathBlocks.add(rect.getRectangle());
+				if(rect.getName()!= null && rect.getName().equals("lava"))
+				{
+					lava.add(new Lava(lavaAnimation,temp.x, temp.y, ((int)(temp.width) / 32) ));
+				}
+				deathBlocks.add(temp);
 			}
 			else if(rect.getProperties().get("type").equals("sign"))
 			{
-				signs.add(new Sign(rect.getRectangle(), rect.getName()));
+				signs.add(new Sign(temp, rect.getName()));
 			}
 			
 		}
 		Camera.init();	
 	}	
 
+	public void init(){}
 
 	@Override
 	public void render(float delta) 
 	{
+		In.updateController();
 		update(delta);
+		Camera.shakeHandle(delta);
 		camera.update();
 
 		batch.setProjectionMatrix(camera.combined);
@@ -98,6 +120,10 @@ public class Stage extends OrthogonalTiledMapRenderer implements Screen
 					endRender();
 					batch.begin();		
 					draw();
+					for(Lava l : lava)
+					{
+						l.draw(delta);
+					}
 					batch.end();
 					beginRender();
 				}

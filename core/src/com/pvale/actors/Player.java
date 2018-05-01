@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.pvale.tools.Camera;
 import com.pvale.tools.In;
 import com.pvale.tools.Media;
+import com.pvale.tools.Wall;
 
 import java.util.List;
 
@@ -41,13 +42,14 @@ public class Player extends Actor
     private float speed;
     private float rotation;
     private long deadTimer;
-    private int state;
-    
+    public int state;
+
+    private boolean cameraControl;
     public boolean grounded;
     private boolean hasControls;
     private boolean direction;
 
-    public Player(List<Rectangle> tiles)
+    public Player(List<Wall> tiles)
     {
         super("Player", tiles);
 
@@ -72,6 +74,7 @@ public class Player extends Actor
         rotation = 0f;
         grounded = true;
         hasControls = true;
+        cameraControl = true;
     }
     
     @Override
@@ -80,7 +83,7 @@ public class Player extends Actor
         animationDelta += delta;
         if(hasControls) controls(delta);
         mapCollision(delta);
-        cameraHandle(delta);
+        if(cameraControl) cameraHandle(delta);
 
         if(state == LANDING && currentAnimation.isAnimationFinished(animationDelta))
         {
@@ -100,14 +103,17 @@ public class Player extends Actor
         {
             setState(DEAD);
         }
-        if(state == DEAD && System.currentTimeMillis() - deadTimer > 1200)
-        {
-            setState(IDDLING);
-            x = startX;
-            y = startY;
-            hasControls();
-        }
+      
 
+    }
+
+    public void revive()
+    {
+        if(state != DEAD) return;
+        setState(IDDLING);
+        x = startX;
+        y = startY;
+        hasControls();
     }
     
     private void cameraHandle( float delta)
@@ -132,8 +138,9 @@ public class Player extends Actor
     {
         if(isDead()) return;
         boolean newGrounded = false;
-        for(Rectangle tile : tiles)
+        for(Wall wall : tiles)
         {
+            Rectangle tile = wall.getRect();
             Rectangle myRect = myRect();
             if(myRect.overlaps(tile))
             {
@@ -180,6 +187,7 @@ public class Player extends Actor
             gravity = -jumpSpeed; 
         }
 
+
         if(In.right())
         {
             if(state != PREPARING && state != LANDING)
@@ -209,9 +217,17 @@ public class Player extends Actor
             setState(IDDLING);
         }
 
-        if(In.menu())
-            die();
 
+    }
+
+    public void unBindCamera()
+    {
+        cameraControl = false;
+    }
+
+    public void bindCamera()
+    {
+        cameraControl = true;
     }
 
     public void setState(int state, boolean force)
@@ -310,6 +326,11 @@ public class Player extends Actor
     {
         this.x = x;
         this.y = y;
+        setCheckpoint(x, y);
+    }
+
+    public void setCheckpoint(float x, float y)
+    {
         startX = x;
         startY = y;
     }

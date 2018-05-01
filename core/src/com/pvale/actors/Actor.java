@@ -2,6 +2,8 @@ package com.pvale.actors;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.pvale.tools.Wall;
+
 import java.util.List;
 
 public class Actor
@@ -12,12 +14,12 @@ public class Actor
     protected static final boolean RIGHT = true;
     protected static final boolean LEFT = false;
 
-    public List<Rectangle> tiles;
+    public List<Wall> tiles;
     public int myId;
     public String myName;
     public float x,y;
 
-    public Actor(String name, List<Rectangle> tiles)
+    public Actor(String name, List<Wall> tiles)
     {
         lastId ++;
         myId = lastId;
@@ -26,7 +28,7 @@ public class Actor
         setTiles(tiles);
     }
     
-    public void setTiles( List<Rectangle> tiles)
+    public void setTiles( List<Wall> tiles)
     {
         this.tiles = tiles;
     }

@@ -96,6 +96,7 @@ public class Intro extends Stage
             player.setPosition(264, player.y);
             if(System.currentTimeMillis() - lastState > 2000)
             {
+                dispose();
                 game.setScreen(new Test(player));
             }
         }
@@ -201,7 +202,6 @@ public class Intro extends Stage
         {
             player.hasNoControls();
         }
-
     }
 
     private void nextState()
@@ -218,7 +218,12 @@ public class Intro extends Stage
         batch.draw(keys[1], 112f, 82f);
         batch.draw(keys[0], 94f, 82f);
         batch.setColor(Color.WHITE);
+    }
 
+    @Override
+    public void dispose()
+    {
+        keyboards.dispose();
     }
 
 }

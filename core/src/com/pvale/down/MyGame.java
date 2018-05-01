@@ -9,6 +9,7 @@ import com.pvale.actors.Player;
 import com.pvale.stages.*;
 import com.pvale.tools.Camera;
 import com.pvale.tools.Font;
+import com.pvale.tools.In;
 
 // import com.badlogic.gdx.Gdx;
 // import com.badlogic.gdx.graphics.GL20;
@@ -23,7 +24,9 @@ public class MyGame extends Game
 		prefs = Gdx.app.getPreferences("pvaledown");
 
 		Font.init();
-
+		
+		In.loadController();
+		
 		Stage.camera = new OrthographicCamera();
 		Stage.camera.setToOrtho(false, Camera.getWidth(), Camera.getHeight());
 		Stage.batch = new SpriteBatch();

@@ -15,6 +15,13 @@ public class Camera
     public static float alpha = 1f;
     public static float speed = 0.8f;
     
+    public static int numShakes = 5;
+    public static boolean shaking = false;
+
+    public static float cameraAngle = 0f;
+    public static float shakeAngle = 0f;
+    public static int shakeState = 0;
+
     public static Texture primitive;
 
     public static void setBorders(float a, float b, float c, float d)
@@ -146,6 +153,62 @@ public class Camera
             alpha = 1f;
             if(newSpeed > 0f) speed = newSpeed;
             else speed = 0.3f;
+        }
+    }
+
+    public static void rotate(float angle)
+    {
+        Stage.camera.rotate(angle - cameraAngle);
+        cameraAngle += angle - cameraAngle;
+        if(cameraAngle > 360) cameraAngle -= 360;
+    }
+
+    public static void shake()
+    {
+        shake(5);
+    }
+
+    public static void shake(int s)
+    {
+        if(shaking) return;
+        shaking = true;
+        shakeState = 0;
+        shakeAngle = 0f;
+        Stage.camera.zoom = 0.97f;
+        numShakes = s;
+    }
+
+    public static void shakeHandle(float delta)
+    {
+        if(shaking)
+        {
+            if(shakeState % 2 == 0)
+            {
+                shakeAngle += delta * 60f;
+                rotate(shakeAngle);
+                if(shakeAngle > 2.5f)
+                {
+                    shakeAngle = 2.5f;
+                    shakeState++;
+                } 
+            }
+            else
+            {
+                shakeAngle -= delta * 60f;
+                rotate(shakeAngle);
+                if(shakeAngle < -2.5f)
+                {
+                    shakeAngle = -2.5f;
+                    shakeState++;
+                } 
+            }
+            if(shakeState >= numShakes)
+            {
+                shaking = false;
+                Stage.camera.zoom = 1;
+                shakeState = 0;
+                rotate(0);
+            }
         }
     }
 
