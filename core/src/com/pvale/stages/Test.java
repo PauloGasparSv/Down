@@ -10,6 +10,12 @@ import com.pvale.tools.Camera;
 import com.pvale.tools.MapPoint;
 import com.pvale.tools.Media;
 import com.pvale.tools.Wall;
+import com.pvale.down.MyGame;
+import com.pvale.tools.Warp;
+import com.pvale.tools.Stair;
+import com.pvale.tools.Font;
+import com.pvale.tools.Stair;
+import com.pvale.actors.Snake;
 
 public class Test extends Stage
 {
@@ -36,6 +42,8 @@ public class Test extends Stage
     private int state;
     private int stateHelper;
 
+    private boolean []willWarp;
+
     private Texture grokSheet;
     private Animation<TextureRegion> gork;
     private float grokX, grokY;
@@ -57,23 +65,19 @@ public class Test extends Stage
 
         keys = Media.getSheetFrames(keyboards, 1, 6, 10, 10);
 
-        for(MapPoint point : points)
-        {
-            if(point.getName().equals("player"))
-            {
-                player.setPosition(point.getX(), point.getY());
-            }   
-        }
 
         for(Wall wall : tiles)
         {
-            if(wall.getName() != null && wall.getName().equals("bridge"))
+            if(wall.getName() != null)
             {
-                bridge = wall;
-            }
-            else if(wall.getName() != null && wall.getName().equals("pillar"))
-            {
-                dragonPillar = wall;
+                if(wall.getName().equals("bridge"))
+                {
+                    bridge = wall;
+                }
+                else if(wall.getName().equals("pillar"))
+                {
+                    dragonPillar = wall;
+                }
             }
         }
 
@@ -84,24 +88,74 @@ public class Test extends Stage
     @Override
     public void init()
     {
+        for(Snake snake : snakes)
+        {
+            snake.init(player);
+        }
+
+        
+        player.hasControls();
+        willWarp = new boolean[2];
+        boolean visited = false;
+        if(MyGame.prefs.contains("visitedfirst"))
+        {
+            System.out.println("CONTAINS");
+            visited = MyGame.prefs.getBoolean("visitedfirst");
+        }
+
+        bridgeY = new float[8];
+        bridgeFall = new boolean[8];
         player.bindCamera();
         Camera.left = 0f;
         Camera.right = 1600f;
-        stateHelper = 0;
-        pillarX = 432f;
-        pillarY = 280f;
-        jumpButtonAlpha = movingButtonsAlpha = 0f;
-        bridge.setWidth(368f);   
-        bridgeY = new float[8];
-        bridgeFall = new boolean[8];
-        dragonPillar.setWidth(0);
-        for(int i = 0; i < 8; i ++)
-        {
-            bridgeY[i] = 38f;
-            bridgeFall[i] = false;
-        }
 
-        state = 0;
+        if(!visited)
+        {
+            stateHelper = 0;
+            pillarX = 432f;
+            pillarY = 280f;
+            dragonPillar.setWidth(0);
+            bridge.setWidth(368f); 
+            state = 0;  
+            for(int i = 0; i < 8; i ++)
+            {
+                bridgeY[i] = 38f;
+                bridgeFall[i] = false;
+            }
+    
+            for(MapPoint point : points)
+            {
+                if(point.getName().equals("player"))
+                {
+                    player.setPosition(point.getX(), point.getY());
+                }   
+            }
+        }
+        else
+        {
+            grokX = grokY  = -1000f;
+            bridge.setWidth(240f);
+            pillarY = 16f;
+            pillarX  = 448f;
+            stateHelper =  1;
+            dragonPillar.setWidth(128f);
+            state = 12;
+            
+            for(MapPoint point : points)
+            {
+                if(point.getName().equals("player2"))
+                {
+                    player.setPosition(point.getX(), point.getY());
+                }   
+            }
+            for(int i = 0; i < 8; i ++)
+            {
+                bridgeY[i] = -90f;
+                bridgeFall[i] = true;
+            }
+        }
+        
+        jumpButtonAlpha = movingButtonsAlpha = 0f;
         
         Camera.fadeIn(player.state == Player.DEAD || player.state == Player.DYING ? 0.1f : 0.3f);
     }
@@ -112,6 +166,73 @@ public class Test extends Stage
         player.update(delta);   
         if(player.x < -8f) player.x = -8f;
 
+        stateHandler(delta);
+
+        for(Snake snake : snakes)
+        {
+            snake.update(delta);
+        }
+
+        for(Warp warp : warps)
+        {
+            if(player.myRect().overlaps(warp.getRect()))
+            {
+                if(warp.getName().equals("warp1") && !willWarp[0] )
+                {
+                    MyGame.prefs.putBoolean("visitedfirst", true);
+                    MyGame.prefs.flush();
+                    willWarp[0] = true;
+                    player.hasNoControls();
+                    Camera.fadeOut(2f);
+                }
+                if(warp.getName().equals("warp4") && !willWarp[1] )
+                {
+                    willWarp[1] = true;
+                    player.hasNoControls();
+                    Camera.fadeOut(0.8f);
+                }
+            }
+        }
+
+        if(willWarp[0] && Camera.draw == Camera.BLACK)
+        {
+            dispose();
+            game.setScreen(new SecondArea(player));
+            return;
+        }
+
+        if(player.state == Player.DEAD)
+        {
+            player.revive();
+            if(player.state != Player.DEAD)
+                init();
+        }
+
+        for(Stair stair : stairs)
+        {
+            if(stair.getRect().overlaps(player.myRect()))
+            {
+                player.stair();
+                break;
+            }
+        }
+
+        if(!player.isDead())
+        {
+            for(Rectangle death : deathBlocks)
+            {
+                if(player.myRect().overlaps(death))
+                {
+                    Camera.fadeOut(1f);
+                    player.die();
+                    break;
+                }
+            }
+        }
+    }
+
+    private void stateHandler(float delta)
+    {
 
         if(movingButtonsAlpha < 1f)
         {
@@ -287,11 +408,12 @@ public class Test extends Stage
             }
             if(player.x > 1600f)
             {
-                Camera.fadeOut(2f);
+                System.out.println("HI");
+              
                 state  = 11;
             }
         }
-
+        
         if(state < 4)
         {
             for(int i = 0; i < 8; i ++)
@@ -300,27 +422,6 @@ public class Test extends Stage
                     bridgeY[i] -= delta * 42f;
             }
         }
-
-        if(player.state == Player.DEAD)
-        {
-            player.revive();
-            if(player.state != Player.DEAD)
-                init();
-        }
-
-        if(!player.isDead())
-        {
-            for(Rectangle death : deathBlocks)
-            {
-                if(player.myRect().overlaps(death))
-                {
-                    Camera.fadeOut(1f);
-                    player.die();
-                    break;
-                }
-            }
-        }
-    
     }
 
     public void draw()
@@ -333,7 +434,10 @@ public class Test extends Stage
         batch.draw(keys[4], 464f, 72f);
         batch.setColor(Color.WHITE);
 
-
+        for(Snake snake : snakes)
+        {
+            snake.draw(batch);
+        }
         
         if(state > 6)
         {
@@ -358,6 +462,12 @@ public class Test extends Stage
             else
                 batch.draw(pillar, pillarX, pillarY, 0, 0, 152, 32, 1f, 1f, 0f, 0, 0, 152, 32, false, false);
         }
+
+        if(willWarp[1] && Camera.draw == Camera.BLACK)
+        {
+            Font.drawBig("Thanks for playing!", Camera.getX() + 20, Camera.getY() + 72, 1f);
+        }
+
     }
 
     @Override

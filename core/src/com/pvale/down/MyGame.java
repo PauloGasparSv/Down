@@ -22,6 +22,9 @@ public class MyGame extends Game
 	public void create () 
 	{   
 		prefs = Gdx.app.getPreferences("pvaledown");
+		prefs.putBoolean("visitedfirst", false);
+		// prefs.putBoolean("visitedfirst", true);
+		prefs.flush();
 
 		Font.init();
 		
@@ -32,8 +35,8 @@ public class MyGame extends Game
 		Stage.batch = new SpriteBatch();
 		Stage.game = this;
 
-		// setScreen(new Intro());
-		setScreen(new Test(new Player(null)));
+		setScreen(new Intro());
+		// setScreen(new Test(new Player(null)));
 	}
 
 	@Override

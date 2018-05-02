@@ -157,7 +157,7 @@ public class Intro extends Stage
         }
         else if(state == 5)
         {
-            player.y = 61f;
+            player.y = 62f;
             playerColor += delta * 0.6f;
             lightOpacity += delta * 0.6f;
             if(playerColor > 1f)

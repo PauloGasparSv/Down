@@ -24,6 +24,7 @@ public class Player extends Actor
     public static final int LANDING = 5;
     public static final int DYING = 6;
     public static final int DEAD = 7;
+    public static final int CLIMBING = 8;
 
     private Texture texture;
     private Animation<TextureRegion> currentAnimation;
@@ -34,9 +35,11 @@ public class Player extends Actor
     private Animation<TextureRegion> falling;
     private Animation<TextureRegion> landing;
     private Animation<TextureRegion> dying;
+    private Animation<TextureRegion> climbing;
 
     private Smoke smoke;
 
+    private boolean stair;
     public float gravity;
     public float jumpSpeed;
     private float startX;
@@ -65,6 +68,7 @@ public class Player extends Actor
         landing = new Animation<TextureRegion>(0.3f, Media.getSheetFrames(texture, 192, 24, 1, 1, 24, 24));
         dying = new Animation<TextureRegion>(0.08f, Media.getSheetFrames(texture, 624, 24, 1, 9, 24, 24));
         smoke = new Smoke(new Animation<TextureRegion>(0.1f, Media.getSheetFrames(Media.loadTexture("smoke.png"), 1, 4, 16, 16)));
+        climbing = new Animation<TextureRegion>(0.2f, Media.getSheetFrames(texture, 456, 24, 1, 4, 24, 24));
 
         setState(IDDLING, true);
         direction = RIGHT;
@@ -73,8 +77,8 @@ public class Player extends Actor
         y = 64f;
         animationDelta = 0f;
         gravity = 0f;
-        speed = 48f;
-        jumpSpeed = 94f;
+        speed = 48.5f * 1f;
+        jumpSpeed = 96f * 1f;
         rotation = 0f;
         grounded = true;
         hasControls = true;
@@ -85,7 +89,8 @@ public class Player extends Actor
     public void update(float delta)
     {
         super.update(delta);
-        animationDelta += delta;
+        if(state != CLIMBING)
+            animationDelta += delta;
         if(hasControls) controls(delta);
         mapCollision(delta);
         if(cameraControl) cameraHandle(delta);
@@ -95,7 +100,18 @@ public class Player extends Actor
             setState(IDDLING);
         }
 
-        if(!grounded && state != DEAD && state != DYING)
+        if(state == CLIMBING)
+        {
+            if(grounded)
+                setState(IDDLING);
+            else if(!stair)
+            {
+                grounded = false;
+                setState(FALLING);
+            }
+        }
+
+        if(!grounded && state != DEAD && state != DYING && state != CLIMBING)
         {
             if(gravity < 140f)
                 gravity += delta * 275f;
@@ -110,7 +126,12 @@ public class Player extends Actor
         }
       
         smoke.update(delta);
+        stair = false;
+    }
 
+    public void stair()
+    {
+        stair = true;
     }
 
     public void revive()
@@ -139,6 +160,11 @@ public class Player extends Actor
             Camera.move(0, y - Camera.getY() - 32f);
         }
 
+        if(y > Camera.getY() + Camera.getHeight() - 72f)
+        {
+            Camera.move(0, y - Camera.getY() - Camera.getHeight() + 72f);
+        }
+
     }
 
     private void mapCollision(float delta)
@@ -151,7 +177,7 @@ public class Player extends Actor
             Rectangle myRect = myRect();
             if(myRect.overlaps(tile))
             {
-                if(myRect.y > tile.y + tile.height - 4)
+                if(myRect.y > tile.y + tile.height - 4 && gravity > -4f)
                 {
                     newGrounded = true;
                     groundMe(tile.y + tile.height);
@@ -179,7 +205,7 @@ public class Player extends Actor
     private void controls(float delta)
     {
         if(isDead()) return;
-        if(In.jump())
+        if(In.jump() && state != CLIMBING)
         {
             if(grounded && state != PREPARING)
             {
@@ -194,6 +220,26 @@ public class Player extends Actor
             gravity = -jumpSpeed; 
         }
 
+        if(In.up() && stair)
+        {
+            if(state != CLIMBING)
+            {
+                gravity = 0f;
+                grounded = false;
+                y += 2f;
+                setState(CLIMBING);
+            }
+            else
+            {
+                animationDelta += delta;
+            }
+            y += speed * delta * 0.35f;
+        }
+
+        if(In.down() && stair && state == CLIMBING)
+        {
+            y -= speed * delta * 0.5f;
+        }
 
         if(In.right())
         {
@@ -272,6 +318,9 @@ public class Player extends Actor
                 deadTimer = System.currentTimeMillis();
                 animationDelta = 100f;
                 currentAnimation = dying;
+                break;
+            case CLIMBING:
+                currentAnimation = climbing;
                 break;
         }
     }

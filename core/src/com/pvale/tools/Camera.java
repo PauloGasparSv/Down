@@ -6,6 +6,9 @@ import com.pvale.stages.Stage;
 
 public class Camera
 {
+    public static final int TRANSPARENT = 0;
+    public static final int BLACK = 2;
+
     public static float top = 435f;
     public static float bottom = 0f;
     public static float left = 0;

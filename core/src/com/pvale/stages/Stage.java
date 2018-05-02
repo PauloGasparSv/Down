@@ -3,8 +3,6 @@ package com.pvale.stages;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.lang.model.util.ElementScanner6;
-
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -27,6 +25,9 @@ import com.pvale.tools.MapPoint;
 import com.pvale.tools.Media;
 import com.pvale.tools.Wall;
 import com.pvale.tools.Sign;
+import com.pvale.tools.Warp;
+import com.pvale.tools.Stair;
+import com.pvale.actors.Snake;
 
 public class Stage extends OrthogonalTiledMapRenderer implements Screen 
 {
@@ -35,11 +36,15 @@ public class Stage extends OrthogonalTiledMapRenderer implements Screen
 	public static MyGame game;
 
 	public static Animation<TextureRegion> lavaAnimation;
+	public static Animation<TextureRegion> snakeAnimation;
 	
+	protected List<Stair> stairs;
+	protected List<Warp> warps;
 	protected List<Lava> lava;
 	protected List<Wall> tiles;
 	protected List<Rectangle> deathBlocks;
 	protected List<Sign> signs;
+	protected List<Snake> snakes;
 	protected List<MapPoint> points; 
 	protected MapLayers layers;
 
@@ -52,7 +57,11 @@ public class Stage extends OrthogonalTiledMapRenderer implements Screen
 
 		if(lavaAnimation == null)
 		{
-			lavaAnimation = new Animation<TextureRegion>(0.4f, Media.getSheetFrames(Media.loadTexture("stage/animated/lava.png"), 1, 3, 32, 32));
+			lavaAnimation = new Animation<TextureRegion>(0.38f, Media.getSheetFrames(Media.loadTexture("stage/animated/lava.png"), 1, 3, 32, 32));
+		}
+		if(snakeAnimation ==  null)
+		{
+			snakeAnimation = new Animation<TextureRegion>(0.42f, Media.getSheetFrames(Media.loadTexture("characters.png"), 0, 72,1, 3, 24, 24));
 		}
 
 		Camera.setBorders(0, (Integer)map.getProperties().get("height") * 16,
@@ -64,16 +73,22 @@ public class Stage extends OrthogonalTiledMapRenderer implements Screen
 		deathBlocks = new LinkedList<Rectangle>();
 		signs = new LinkedList<Sign>();	
 		lava = new LinkedList<Lava>();	
+		warps = new LinkedList<Warp>();
+		stairs = new LinkedList<Stair>();
+		snakes = new LinkedList<Snake>();
 
 		Array<RectangleMapObject> tileRects =  map.getLayers().get(tilesLayer).getObjects().getByType(RectangleMapObject.class);
 		
 		for(RectangleMapObject rect : tileRects)
-		{	
+		{
 			Rectangle temp = rect.getRectangle();
 			if(rect.getProperties().get("type").equals("position"))
 			{
 				points.add(new MapPoint(temp.x, temp.y, rect.getName()));	
-				continue;
+			}
+			else if(rect.getProperties().get("type").equals("snake"))
+			{
+				snakes.add(new Snake(snakeAnimation, temp.x, temp.y));
 			}
 			else if(rect.getProperties().get("type").equals("wall"))
 			{
@@ -91,7 +106,14 @@ public class Stage extends OrthogonalTiledMapRenderer implements Screen
 			{
 				signs.add(new Sign(temp, rect.getName()));
 			}
-			
+			else if(rect.getProperties().get("type").equals("warp"))
+			{
+				warps.add(new Warp(temp, rect.getName()));
+			}
+			else if(rect.getProperties().get("type").equals("stair"))
+			{
+				stairs.add(new Stair(temp, rect.getName()));
+			}
 		}
 		Camera.init();	
 	}	
