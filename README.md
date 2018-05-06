@@ -6,8 +6,10 @@ This is pretty much a demo of what i can do in around three to four days of free
 
 You are a little king lost in this cave and your objective is simply to escape :)
 
+I would like to thank Allan Alves on this one for helping me. Keep on inspiring me to be a better coder buddy. 
+
 ![Alt text](showcase2.png?raw=true "Oi")
 
 ![Alt text](showcase1.png?raw=true "Oi")
 
-![Alt text](showcase3.png?raw=true "Oi")
+![Alt text](showcase4.png?raw=true "Oi")
