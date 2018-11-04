@@ -4,7 +4,9 @@
   "description": "Game about feelings",
   "scripts": {
     "start": "gradlew desktop:run",
-    "jar": "gradlew desktop:dist"
+    "start-linux": "sudo ./gradlew desktop:run",
+    "jar": "gradlew desktop:dist",
+    "jar-linux": "sudo ./gradlew desktop:dist"
   },
   "author": "Paulo Vale"
 }

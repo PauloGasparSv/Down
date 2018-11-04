@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-down" width="16" height="30" tilewidth="16" tileheight="16" infinite="0" nextobjectid="12">
- <tileset firstgid="1" source="amazingcavebackground.tsx"/>
- <tileset firstgid="281" source="amazingcave.tsx"/>
+ <tileset firstgid="1" source="amazing_cave_background.tsx"/>
+ <tileset firstgid="281" source="amazing_cave.tsx"/>
  <tileset firstgid="953" source="fx.tsx"/>
- <tileset firstgid="977" source="secondarytileset.tsx"/>
+ <tileset firstgid="977" source="secondary_tileset.tsx"/>
  <layer name="background" width="16" height="30">
   <data encoding="csv">
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,

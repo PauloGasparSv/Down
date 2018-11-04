@@ -51,16 +51,13 @@ public class Stage extends OrthogonalTiledMapRenderer implements Screen
 	private int spriteLayer = 2;
 	private int tilesLayer = 4;
 
-	public Stage(String path)
-	{
+	public Stage(String path) {
 		super(new TmxMapLoader().load(path));
 
-		if(lavaAnimation == null)
-		{
+		if(lavaAnimation == null) {
 			lavaAnimation = new Animation<TextureRegion>(0.38f, Media.getSheetFrames(Media.loadTexture("stage/animated/lava.png"), 1, 3, 32, 32));
 		}
-		if(snakeAnimation ==  null)
-		{
+		if(snakeAnimation ==  null) {
 			snakeAnimation = new Animation<TextureRegion>(0.42f, Media.getSheetFrames(Media.loadTexture("characters.png"), 0, 72,1, 3, 24, 24));
 		}
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-down" width="100" height="30" tilewidth="16" tileheight="16" infinite="0" nextobjectid="292">
- <tileset firstgid="1" source="amazingcave.tsx"/>
- <tileset firstgid="673" source="amazingcavebackground.tsx"/>
+ <tileset firstgid="1" source="amazing_cave.tsx"/>
+ <tileset firstgid="673" source="amazing_cave_background.tsx"/>
  <tileset firstgid="953" source="cave.tsx"/>
  <layer name="background" width="100" height="30">
   <data encoding="csv">
